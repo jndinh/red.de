@@ -35,7 +35,7 @@ class tract:
         '''
         this appends a tract to the list of adjacent tracts
         
-        arguments: tract. A tract object, already initialized
+        arguments: tract. A str (the tract id). No default
         '''
         
         self.adjacent_to.append(tract)
@@ -45,10 +45,19 @@ class tract:
         this is a convenience to set the adjacent_to attribute to a new list
         provided in case extra processing has to go here
         
-        arguments: areas. A list of tracts it is adjacent to. No default
+        arguments: areas. A list of tract ids (strs) it is adjacent to. No default
         '''
         
         self.adjacent_to = areas
+        
+    def bulk_add_adjacencies(self, tracts):
+        '''
+        this appends a list of tracts to the list of adjacent tracts
+        
+        arguments: tracts. A list of tract ids (strs) it is adjacent to. No default
+        '''
+        
+        self.adjacent_to.extend(tracts)
    
     def get_adjacencies(self):
         '''
@@ -122,8 +131,29 @@ class district:
 
 # here begins a sample of how to set up a tract object
 import json
+import csv # ...
+import re
+
 from urllib import urlopen
 from constants import api_key
+
+def get_adjacent_tracts(tract):
+    # this gets just the tract ids, not county ids or state codes
+    # first two chars are 24, then 3 chars for county code. then tract id
+    tract_regex = re.compile("^24\d{3}(\d{6})$")
+    
+    with open("./tracts/md_adj_tracts.csv", "r") as tracts_csv:
+        reader = csv.DictReader(tracts_csv)
+        ids = []
+        for row in reader:
+            row_match = tract_regex.match(row['SOURCE_TRACTID'])
+            if row_match.group(1) == tract.id:
+                adj_match = tract_regex.match(row['NEIGHBOR_TRACTID'])
+                ids.append(adj_match.group(1))
+        
+        tract.bulk_add_adjacencies(ids)
+        
+    return tract
 
 def set_up_tract():
     # this url gets population 18 years & older for one tract in MD
@@ -136,4 +166,8 @@ def set_up_tract():
         data = json.load(response)
         # sorry. the census api hands back deficient json
         my_tract = tract( int(data[1][0]), data[1][3] )
+        my_tract = get_adjacent_tracts(my_tract)
         print "Here is our tract: " + str(my_tract)
+        print "Here is the first adjacent tract: " + str(my_tract.adjacent_to[0])
+        print "Here is the length of adjacent tracts: " + str(len(my_tract.adjacent_to))
+
