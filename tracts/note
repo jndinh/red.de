@@ -1,2 +1,0 @@
-TRACTID in csv file is structured like:
-24XXXYYYYYY where 24 is the state id (MD), XXX is the county id, and YYYYYY is the tract id
