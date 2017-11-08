@@ -1,3 +1,15 @@
+'''
+
+this file includes methods to fetch census tracts and deal with them
+
+currently, there is just one method: get_all_tracts(), which fetches
+all the census tracts, adds their adjacencies, and returns them as a dictionary
+
+CHANGELOG
+Dorothy Carter - 20171107 - initial creation of script
+
+'''
+
 import json
 import csv
 import re
@@ -10,6 +22,12 @@ import geography_objects
 
 
 def get_all_tracts():
+    '''
+    this method grabs all MD census tracts and populates their adjacency lists
+    returns: a dictionary of all tracts where the keys are the tract ids and
+             the values are the tract objects
+    '''
+    
     # this gets the population 18 years & older (P010000) for all census tracts in MD    
     url = "https://api.census.gov/data/2010/sf1?get=P0100001&for=tract:*&in=state:24&key=" + census_api_key
 
@@ -36,4 +54,4 @@ def get_all_tracts():
                 row_match = tract_regex.match(row['SOURCE_TRACTID'])
                 all_tracts[row_match.group(1)].add_adjacency(tract_regex.match(row['NEIGHBOR_TRACTID']).group(1))
 
-        return [k for k in all_tracts.values()]
+        return all_tracts
