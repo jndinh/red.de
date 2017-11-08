@@ -129,45 +129,5 @@ class district:
         return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " included"
 
 
-# here begins a sample of how to set up a tract object
-import json
-import csv # ...
-import re
 
-from urllib import urlopen
-from constants import api_key
-
-def get_adjacent_tracts(tract):
-    # this gets just the tract ids, not county ids or state codes
-    # first two chars are 24, then 3 chars for county code. then tract id
-    tract_regex = re.compile("^24\d{3}(\d{6})$")
-    
-    with open("./tracts/md_adj_tracts.csv", "r") as tracts_csv:
-        reader = csv.DictReader(tracts_csv)
-        ids = []
-        for row in reader:
-            row_match = tract_regex.match(row['SOURCE_TRACTID'])
-            if row_match.group(1) == tract.id:
-                adj_match = tract_regex.match(row['NEIGHBOR_TRACTID'])
-                ids.append(adj_match.group(1))
-        
-        tract.bulk_add_adjacencies(ids)
-        
-    return tract
-
-def set_up_tract():
-    # this url gets population 18 years & older for one tract in MD
-    url = "https://api.census.gov/data/2010/sf1?get=P0100001&for=tract:000100&in=state:24&in=county:001&key=" + api_key
-    
-    response = urlopen(url)
-    if response.getcode() != 200:
-        print "URL opening did not go too well. HTTP status code: " + str(response.getcode())
-    else:
-        data = json.load(response)
-        # sorry. the census api hands back deficient json
-        my_tract = tract( int(data[1][0]), data[1][3] )
-        my_tract = get_adjacent_tracts(my_tract)
-        print "Here is our tract: " + str(my_tract)
-        print "Here is the first adjacent tract: " + str(my_tract.adjacent_to[0])
-        print "Here is the length of adjacent tracts: " + str(len(my_tract.adjacent_to))
 
