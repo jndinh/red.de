@@ -11,10 +11,9 @@ A district object represents a congressional district. It stores
 * population (int)
 * component tracts (list of tracts)
 
-This module also includes a sample method to retrieve data to set up a tract object
-
 CHANGE LOG
 Dorothy Carter - 20171028 - initial creation of classes & script
+Dorothy Carter - 20171107 - removal of sample scripts
 
 '''
 
@@ -127,7 +126,3 @@ class district:
         this prints the district object nicely
         '''
         return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " included"
-
-
-
-
