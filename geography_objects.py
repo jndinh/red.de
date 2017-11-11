@@ -14,6 +14,9 @@ A district object represents a congressional district. It stores
 CHANGE LOG
 Dorothy Carter - 20171028 - initial creation of classes & script
 Dorothy Carter - 20171107 - removal of sample scripts
+Dorothy Carter - 20171109 - __eq__() method in tract
+                            population updating in district
+                            creation of district_error
 
 '''
 
@@ -74,6 +77,17 @@ class tract:
         this prints the tract object nicely.
         '''
         return "Census tract " + self.id + ". Population: " + str(self.population)
+    
+    def __eq__(self, other):
+        '''
+        this compares tract ids to determine equality
+        '''
+        
+        if hasattr(other, "id"):
+            return self.id == other.id
+        else:
+            return self.id == other.__str__()
+
 
 class district:
     def __init__(self, pop=0):
@@ -92,6 +106,7 @@ class district:
                    tract_pop (=population of tract). Int. No default
         '''
         self.tracts.append( tract(tract_pop, tract_id) )
+        self.population += tract_pop
     
     def add_tract(self, tract):
         '''
@@ -99,6 +114,7 @@ class district:
         arguments: tract. A tract object. No default
         '''
         self.tracts.append(tract)
+        self.population += tract.population
    
     def bulk_add_tract(self, many_tracts):
         '''
@@ -107,12 +123,20 @@ class district:
         '''
         self.tracts.extend(many_tracts)
         
+        for tract in many_tracts:
+            self.population += tract.population
+        
+        
     def set_tracts_to(self, new_tracts):
         '''
         this sets the list of component tracts to the list passed in
+        also updates population
         arguments: new_tracts. A list of tracts. No default
         '''
         self.tracts = new_tracts
+        
+        for tract in new_tracts:
+            self.population += tract.population
    
     def get_tracts(self):
         '''
@@ -126,3 +150,14 @@ class district:
         this prints the district object nicely
         '''
         return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " included"
+
+
+class district_error(Exception):
+    def __init__(self, msg=""):
+        '''
+        this defines an error originating in these modules,
+        to distinguish from runtime, etc
+        
+        arguments: msg - str - an explanation of the exception
+        '''
+        super.__init__(msg)

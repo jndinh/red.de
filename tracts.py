@@ -7,6 +7,7 @@ all the census tracts, adds their adjacencies, and returns them as a dictionary
 
 CHANGELOG
 Dorothy Carter - 20171107 - initial creation of script
+Dorothy Carter - 20171110 - cast population to int
 
 '''
 
@@ -39,7 +40,7 @@ def get_all_tracts():
         data = json.load(response)
         for t in data[1:]: # the first object is titles of variables
             # population is [0], tract_id is [3]
-            current_tract = geography_objects.tract(t[0], t[3])
+            current_tract = geography_objects.tract(int(t[0]), t[3])
             #current_tract = _get_adjacent_tracts(current_tract)
             all_tracts[t[3]] = current_tract
             
