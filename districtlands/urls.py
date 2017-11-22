@@ -20,6 +20,4 @@ from districtlands import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^example/', include('example.urls')),
-    url(r'^index/$', views.index, name="Index"),
-    url(r'^$', views.index, name="Index"),
 ]

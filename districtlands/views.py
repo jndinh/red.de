@@ -10,4 +10,4 @@ def index(request):
     Returns:
 	HttpResponse: with the rendered text of the specified file
     """
-    return render(request, 'index.html')
+    return render(request, 'index.html', {})
