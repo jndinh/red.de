@@ -29,6 +29,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'districtlands',
     'corsheaders',
     'rest_framework',
     'django.contrib.admin',
