@@ -63,7 +63,7 @@ ROOT_URLCONF = 'districtlands.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(PROJECT_ROOT, 'html/')],
+        'DIRS': [os.path.join(PROJECT_ROOT, 'html')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
