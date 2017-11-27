@@ -24,7 +24,8 @@ number of districts - Maryland is only assigned 8 congressional districts,
                       or fewer. should be easy to fix (maybe)
 
 CHANGE LOG
-Dorothy Carter - 20171109 - initial creation
+Dorothy Carter - 20171109 - initial creation  
+Dorothy Carter - 20171127 - initial work on expanding method         
 
 '''
 
@@ -55,10 +56,15 @@ def _take_tract(tractid):
 def _create_district(start):
     '''
     this creates one congressional district given a starting tract
+    
+    it queues all adjacent tracts for the start, then from the first, etc
+    and grabs them sequentially until the district is made. It takes the next
+    
+    
     arguments: start - a tract object from which districting starts
     returns: a district object representing the finished district
     '''
-
+    
     # tries to add the passed-in starting tract to the district
     # will raise an exception if the district is already taken
     created_district = geography_objects.district()
@@ -66,24 +72,26 @@ def _create_district(start):
         created_district.add_tract(start)
     else:
         raise geography_objects.district_error("starting tract is already taken")
-
-    # current stores the last tract added to district
-    current = start
-
+    
+    # queue up all adjacent tracts to the start
+    queue = set()
+    for t in start.adjacent_to:
+        queue.add(t)
+    
     # this loop keeps trying to add tracts until the district hits
-    # its population target. see ISSUES above for the potential
+    # its population target. see ISSUES above for the potential 
     # infinite loop issue
     while created_district.population <= MAGIC_POPULATION_NUMBER:
-        next = all_tracts[random.choice(current.adjacent_to)]
-
-        if _take_tract(next.id):
+        next = all_tracts[queue.pop()] # dequeue the first tract
+        if _take_tract(next):
             created_district.add_tract(next)
-            current = next
-        else:
-            print("fail")
-
+            # queue all tracts adjacent
+            # since queue is a set, no dupes
+            for t in next.adjacent_to:
+                queue.add(t)  
+    
     return created_district
-
+    
 
 def generic_redistrict():
     '''
@@ -93,11 +101,10 @@ def generic_redistrict():
     start = all_tracts["751200"]
     return specific_redistrict(start)
 
-
 def specific_redistrict(start):
     '''
     this redistricts Maryland using a given start tract
     arguments: start - a tract object that districting will start from
-    returns:
+    returns: 
     '''
     return "not implemented"

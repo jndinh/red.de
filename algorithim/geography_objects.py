@@ -5,7 +5,7 @@ This module defines classes for geographic areas. The classes defined are: tract
 A tract object represents a census tract. Specifically, it stores its
 * population (int)
 * ID (str)
-* adjacent tracts (list of tracts)
+* adjacent tracts (list of strs)
 
 A district object represents a congressional district. It stores
 * population (int)
@@ -17,9 +17,9 @@ Dorothy Carter - 20171107 - removal of sample scripts
 Dorothy Carter - 20171109 - __eq__() method in tract
                             population updating in district
                             creation of district_error
+Dorothy Carter - 20171127 - added __hash__() method in tract
 
 '''
-
 
 class tract:
     def __init__(self, pop=0, tract_id=""):
@@ -89,15 +89,11 @@ class tract:
             return self.id == other.__str__()
 
 
-    def __eq__(self, other):
+    def __hash__(self):
         '''
-        this compares tract ids to determine equality
+        this hashes the object using its tract id
         '''
-
-        if hasattr(other, "id"):
-            return self.id == other.id
-        else:
-            return self.id == other.__str__()
+        return hash(self.id)
 
 
 class district:
