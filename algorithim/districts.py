@@ -70,17 +70,35 @@ def _create_district(start):
     # current stores the last tract added to district
     current = start
 
-    # this loop keeps trying to add tracts until the district hits
-    # its population target. see ISSUES above for the potential
-    # infinite loop issue
-    while created_district.population <= MAGIC_POPULATION_NUMBER:
-        next = all_tracts[random.choice(current.adjacent_to)]
+    # This loop keeps trying to add tracts until the district hits
+    # its population target, or run out of available tracts.
+    # See ISSUES above for the potential infinite loop issue.
+    # Queue of tracts to add
+    to_add = []
+    while (created_district.population <= MAGIC_POPULATION_NUMBER and
+        available_tracts):
+        # Have a "queue" of tracts to add, fill up queue as all adjacents
+        if not to_add: # Empty
+            for eachid in current.adjacent_to:
+                to_add.append(all_tracts[eachid])
 
+        # Get the next tract and try to add to district
+        next = to_add.pop()
         if _take_tract(next.id):
+            # Debug Statement:
+            # print(next.id + " success!")
             created_district.add_tract(next)
-            current = next
+
+            # Add adjacencies to queue, think Breadth First Search, not never keeping track
+            # of where you've been so not as efficient.
+            for eachid in current.adjacent_to:
+                to_add.append(all_tracts[eachid])
         else:
-            print("fail")
+            # Debug Statement:
+            # print(next.id + " fail!")
+            pass
+
+        current = next
 
     return created_district
 
