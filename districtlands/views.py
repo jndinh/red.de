@@ -1,13 +1,26 @@
-import json
-from django.shortcuts import render_to_response
-from django.shortcuts import render 
-from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
+from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
 
-def index(request):
-    """
-    Params:
-    	HttpRequest: from django.http
-    Returns:
-	HttpResponse: with the rendered text of the specified file
-    """
-    return render(request, 'index.html', {})
+
+@api_view(['POST'])
+@csrf_exempt
+def start(request):
+    try:
+	
+        return JsonResponse({'detail' : 'Districts created.', 'districts' : {}}, content_type="application/json", status=200)
+    except Exception as e:
+    	return JsonResponse({'detail' : 'Failed to start predetermined algorithm', 'error' : str(e)}, content_type="application/json", status=400)
+
+
+
+
+@api_view(['POST'])
+@csrf_exempt
+def user_start(request):
+    try:
+    	return JsonResponse({'detail' : 'Districts created.', 'districts' : {}}, content_type="application/json", status=200)
+    except Exception as e:
+    	return JsonResponse({'detail' : 'Failed to start user algorithm', 'error' : str(e)}, content_type="application/json", status=400)
+
