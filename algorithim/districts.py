@@ -13,6 +13,9 @@ fragments - after creating most districts, only a few remain. they are
             unsuitable for another district, being possibly non-adjacent
             and/or not having enough population to make another one
 
+run out of tracts - if there are no unused tracts in the adjacency queue,
+                    an error will be thrown. shouldn't be hard to fix.
+
 validity - check the resulting districts for population parity. if not
            within a certain margin of error, discard this districting
 
@@ -45,6 +48,11 @@ def _take_tract(tractid):
     '''
     tries to remove a tract denoted by tractid. returns True
     if success, False if failure
+    
+    arguments: tractid - a string representing the tract id
+                        (or tract object)
+    returns: bool denoting successful removal of tract (True)
+             or failure (False)
     '''
     try:
         available_tracts.remove(tractid)
@@ -62,7 +70,8 @@ def _create_district(start):
     
     
     arguments: start - a tract object from which districting starts
-    returns: a district object representing the finished district
+    returns: a tuple consisting of: a district object representing the finished district
+                                    the next tract in the queue
     '''
     
     # tries to add the passed-in starting tract to the district
@@ -82,21 +91,29 @@ def _create_district(start):
     # its population target. see ISSUES above for the potential 
     # infinite loop issue
     while created_district.population <= MAGIC_POPULATION_NUMBER:
+        print(len(queue))
         next = all_tracts[queue.pop()] # dequeue the first tract
-        if _take_tract(next):
+        if _take_tract(next.id):
             created_district.add_tract(next)
             # queue all tracts adjacent
             # since queue is a set, no dupes
             for t in next.adjacent_to:
                 queue.add(t)  
     
-    return created_district
+    
+    # this picks a random adjacent tract
+    # see issues above for running out of tracts issue
+    next = ""
+    while queue and (next not in available_tracts):
+        next = random.choice(list(queue))
+    
+    return (created_district, all_tracts[next])
     
 
 def generic_redistrict():
     '''
     this redistricts Maryland using a default start tract
-    returns:
+    returns: a list of 8 district objects
     '''
     start = all_tracts["751200"]
     return specific_redistrict(start)
@@ -105,6 +122,14 @@ def specific_redistrict(start):
     '''
     this redistricts Maryland using a given start tract
     arguments: start - a tract object that districting will start from
-    returns: 
+    returns: a list of district objects (8 district objects)
     '''
-    return "not implemented"
+    districts = []
+    next = start
+    for i in range(8):
+        print("loop index: {} len available: {}".format(i, len(available_tracts)))
+        new_district, next = _create_district(next)
+        districts.append(new_district)
+   
+    print("{} tracts remaining after redistricting".format(len(available_tracts)))
+    return districts

@@ -166,4 +166,4 @@ class district_error(Exception):
         to distinguish from runtime, etc
         arguments: msg - str - an explanation of the exception
         '''
-        super.__init__(msg)
+        super.__init__(self, msg)
