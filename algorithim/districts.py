@@ -4,10 +4,12 @@ this module creates a district out of tracts. it contains two main methods:
 generic_redistrict - re-district Maryland using a default start
 specific_redistrict - given a starting tract, re-district Maryland
 
-and three 'helper' methods:
+and five 'helper' methods:
 _take_tract - remove a tract from available_tracts, and return false if that fails
 _density - returns the proportion of available adjacent tracts to total adjacent tracts
 _create_district - given a starting tract, create a congressional district
+_sanitize_districts - changes a district object to json
+_test_redistrict - redistricts part of MD using two districts
 
 ISSUES
 fragments - after creating most districts, only a few remain. they are
@@ -27,15 +29,22 @@ number of districts - Maryland is only assigned 8 congressional districts,
                       but this (as currently implemented) may create more
                       or fewer. should be easy to fix (maybe)
 
+density method - should maybe go in the tract class
+
+sanitize_districts method - should maybe go in the district class
+
+
 CHANGE LOG
 Dorothy Carter - 20171109 - initial creation  
 Dorothy Carter - 20171127 - initial work on expanding method
 Dorothy Carter - 20171127 - initial work on full redistricting
-Dorothy Carter - 20171128 - _density method       
+Dorothy Carter - 20171128 - _density method
+                            test redistrict methods       
 
 '''
 
 import random
+import json
 
 import tracts
 import geography_objects
@@ -67,13 +76,14 @@ def _take_tract(tractid):
 def _density(this_tract):
     '''
     this measures how many of the tract's adjacent tracts are
-    available to take
+    available to take. this is computationally expensive, but
+    does it matter?
     
     argument: this_tract - a tract object
     returns: a float representing the proportion of available
              tracts to total adjacent tracts
     '''
-    total_adjacent = 0
+    #total_adjacent = 0
     available_adjacent = 0
     
     # adjacent tracts...
@@ -90,7 +100,7 @@ def _density(this_tract):
     second_ring_available = [t for t in friends_of_friends if t in available_tracts]
     available_adjacent = len(first_ring_available) + len(second_ring_available)
     
-    return available_adjacent / (1.0 * total_adjacent)
+    return available_adjacent / (total_adjacent * 1.0)
 
 
 def _create_district(start):
@@ -135,11 +145,55 @@ def _create_district(start):
     
     # this picks a random adjacent tract
     # see issues above for running out of tracts issue
-    next = ""
-    while queue and (next not in available_tracts):
-        next = random.choice(list(queue))
+    next = None
     
-    return (created_district, all_tracts[next])
+    # keep best
+    max_tract = None
+    max_density = 0.0
+    
+    # .875 adjacent is _goodenough_
+    while queue and max_density < .875:
+        next = all_tracts[queue.pop()]
+        next_density = _density(next)
+        if next in available_tracts and next_density > max_density:
+            max_density = next_density
+            max_tract = next
+    
+    return (created_district, max_tract)
+
+
+def _sanitize_districts(district_list):
+    '''
+    changes a list of district objects into json
+    
+    arguments: district_list - a list of districts
+    returns: a JSON blorb string
+    '''
+    ls = []
+    for district in district_list:
+        dist_dict = dict()
+        dist_dict["population"] = district.population
+        dist_dict["tracts"] = [t.id for t in district.tracts]
+        
+        ls.append(dist_dict)
+    
+    return json.dumps(ls)
+    
+
+def _test_redistrict():
+    '''
+    only for test purposes. partially re-districts
+    Maryland into two normal districts ~700_000 in population
+    
+    returns: a JSON blorb string
+    '''
+    districts = []
+    next = all_tracts["751200"]
+    for _ in range(2):
+        new_district, next = _create_district(next)
+        districts.append(new_district)
+    
+    return _sanitize_districts(districts)
     
 
 def generic_redistrict():
@@ -165,3 +219,4 @@ def specific_redistrict(start):
    
     print("{} tracts remaining after redistricting".format(len(available_tracts)))
     return districts
+

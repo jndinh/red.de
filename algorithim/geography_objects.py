@@ -19,6 +19,7 @@ Dorothy Carter - 20171109 - __eq__() method in tract
                             creation of district_error
 Dorothy Carter - 20171127 - added __hash__() method in tract
 Dorothy Carter - 20171128 - fixed some comments
+                            fixed district_error class
 
 '''
 
@@ -169,4 +170,5 @@ class district_error(Exception):
         to distinguish from runtime, etc
         arguments: msg - str - an explanation of the exception
         '''
-        super.__init__(self, msg)
+        super(Exception, self).__init__()
+        self.message = msg
