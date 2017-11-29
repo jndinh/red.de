@@ -1,11 +1,11 @@
 '''
 
-This module defines classes for geographic areas. The classes defined are: tract and district.
+This module defines classes for geographic areas. The classes defined are: tract, district_error, and district.
 
 A tract object represents a census tract. Specifically, it stores its
 * population (int)
 * ID (str)
-* adjacent tracts (list of tracts)
+* adjacent tracts (list of strs)
 
 A district object represents a congressional district. It stores
 * population (int)
@@ -17,9 +17,11 @@ Dorothy Carter - 20171107 - removal of sample scripts
 Dorothy Carter - 20171109 - __eq__() method in tract
                             population updating in district
                             creation of district_error
+Dorothy Carter - 20171127 - added __hash__() method in tract
+Dorothy Carter - 20171128 - fixed some comments
+                            fixed district_error class
 
 '''
-
 
 class tract:
     def __init__(self, pop=0, tract_id=""):
@@ -89,15 +91,11 @@ class tract:
             return self.id == other.__str__()
 
 
-    def __eq__(self, other):
+    def __hash__(self):
         '''
-        this compares tract ids to determine equality
+        this hashes the object using its tract id
         '''
-
-        if hasattr(other, "id"):
-            return self.id == other.id
-        else:
-            return self.id == other.__str__()
+        return hash(self.id)
 
 
 class district:
@@ -153,12 +151,14 @@ class district:
         '''
         this returns the list of component tracts. not strictly necessary (use self.tracts),
         but provided as a convenience
+        returns: list of strs
         '''
         return self.tracts
 
     def __str__(self):
         '''
         this prints the district object nicely
+        returns: a string representing the district
         '''
         return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " tracts included"
 
@@ -170,4 +170,5 @@ class district_error(Exception):
         to distinguish from runtime, etc
         arguments: msg - str - an explanation of the exception
         '''
-        super.__init__(msg)
+        super(Exception, self).__init__()
+        self.message = msg
