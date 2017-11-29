@@ -160,7 +160,7 @@ class district:
         '''
         this prints the district object nicely
         '''
-        return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " included"
+        return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " tracts included"
 
 
 class district_error(Exception):
