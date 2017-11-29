@@ -1,6 +1,6 @@
 '''
 
-This module defines classes for geographic areas. The classes defined are: tract and district.
+This module defines classes for geographic areas. The classes defined are: tract, district_error, and district.
 
 A tract object represents a census tract. Specifically, it stores its
 * population (int)
@@ -18,6 +18,7 @@ Dorothy Carter - 20171109 - __eq__() method in tract
                             population updating in district
                             creation of district_error
 Dorothy Carter - 20171127 - added __hash__() method in tract
+Dorothy Carter - 20171128 - fixed some comments
 
 '''
 
@@ -149,12 +150,14 @@ class district:
         '''
         this returns the list of component tracts. not strictly necessary (use self.tracts),
         but provided as a convenience
+        returns: list of strs
         '''
         return self.tracts
 
     def __str__(self):
         '''
         this prints the district object nicely
+        returns: a string representing the district
         '''
         return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " included"
 

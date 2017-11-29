@@ -4,8 +4,9 @@ this module creates a district out of tracts. it contains two main methods:
 generic_redistrict - re-district Maryland using a default start
 specific_redistrict - given a starting tract, re-district Maryland
 
-and two 'helper' methods:
+and three 'helper' methods:
 _take_tract - remove a tract from available_tracts, and return false if that fails
+_density - returns the proportion of available adjacent tracts to total adjacent tracts
 _create_district - given a starting tract, create a congressional district
 
 ISSUES
@@ -28,7 +29,9 @@ number of districts - Maryland is only assigned 8 congressional districts,
 
 CHANGE LOG
 Dorothy Carter - 20171109 - initial creation  
-Dorothy Carter - 20171127 - initial work on expanding method         
+Dorothy Carter - 20171127 - initial work on expanding method
+Dorothy Carter - 20171127 - initial work on full redistricting
+Dorothy Carter - 20171128 - _density method       
 
 '''
 
@@ -50,7 +53,7 @@ def _take_tract(tractid):
     if success, False if failure
     
     arguments: tractid - a string representing the tract id
-                        (or tract object)
+                        (or tract object - it will work the same)
     returns: bool denoting successful removal of tract (True)
              or failure (False)
     '''
@@ -59,6 +62,35 @@ def _take_tract(tractid):
         return True
     except ValueError:
         return False
+        
+
+def _density(this_tract):
+    '''
+    this measures how many of the tract's adjacent tracts are
+    available to take
+    
+    argument: this_tract - a tract object
+    returns: a float representing the proportion of available
+             tracts to total adjacent tracts
+    '''
+    total_adjacent = 0
+    available_adjacent = 0
+    
+    # adjacent tracts...
+    friends = this_tract.adjacent_to
+    
+    # ... and tracts adjacent to those
+    # avoid duplicates using a set and an if statement
+    friends_of_friends = {ff for tract in friends for ff in all_tracts[tract].adjacent_to if ff not in friends}
+    
+    total_adjacent = len(this_tract.adjacent_to) + len(friends_of_friends)
+    
+    # find those adjacent
+    first_ring_available = [t for t in this_tract.adjacent_to if t in available_tracts]
+    second_ring_available = [t for t in friends_of_friends if t in available_tracts]
+    available_adjacent = len(first_ring_available) + len(second_ring_available)
+    
+    return available_adjacent / (1.0 * total_adjacent)
 
 
 def _create_district(start):
@@ -91,8 +123,8 @@ def _create_district(start):
     # its population target. see ISSUES above for the potential 
     # infinite loop issue
     while created_district.population <= MAGIC_POPULATION_NUMBER:
-        print(len(queue))
         next = all_tracts[queue.pop()] # dequeue the first tract
+        print("in queue: {} ; next score: {}".format(len(queue)+1, _density(next)))
         if _take_tract(next.id):
             created_district.add_tract(next)
             # queue all tracts adjacent
