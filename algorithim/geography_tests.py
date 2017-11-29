@@ -13,7 +13,15 @@ def test_single_district():
 def test_total_redistricting():
     redistrict = districts.generic_redistrict()
     print(redistrict)
+
+def test_density_score():
+    score = districts._density(all_tracts["751200"])
+    print(score)
+    
+def test_test_redistrict():
+    redistrict = districts._test_redistrict()
+    print(redistrict)
     
 
 if __name__ == "__main__":
-    test_total_redistricting()
+    test_test_redistrict()
