@@ -46,7 +46,7 @@ def get_all_tracts():
             all_tracts[t[3]] = current_tract
             
         # get the adjacencies
-        with open(BASE_DIR + "\\algorithm\\tracts_folder\\md_adj_tracts.csv", "r") as tracts_csv:
+        with open(os.path.join(BASE_DIR, "algorithm\\tracts_folder\\md_adj_tracts.csv"), "r") as tracts_csv:
             reader = csv.DictReader(tracts_csv)
             
             # this gets just the tract ids, not county ids or state codes
