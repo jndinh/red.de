@@ -134,7 +134,7 @@ def _create_district(start):
     # infinite loop issue
     while created_district.population <= MAGIC_POPULATION_NUMBER:
         next = all_tracts[queue.pop()] # dequeue the first tract
-        print("in queue: {} ; next score: {}".format(len(queue)+1, _density(next)))
+        #print("in queue: {} ; next score: {}".format(len(queue)+1, _density(next)))
         if _take_tract(next.id):
             # Debug Statement:
             # print(next.id + " success!")
@@ -198,7 +198,7 @@ def _test_redistrict():
     
     return _sanitize_districts(districts)
     
->>>>>>> expanding_rings
+#>>>>>>> expanding_rings
 
 def generic_redistrict():
     '''

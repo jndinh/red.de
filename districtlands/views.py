@@ -2,14 +2,19 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
+import algorithm
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 @csrf_exempt
 def start(request):
+    '''
+    Using a predetermined starting point, send back a list of districts that have been redrawn.
+    '''
     try:
-	
-        return JsonResponse({'detail' : 'Districts created.', 'districts' : {}}, content_type="application/json", status=200)
+        districts = algorithm.districts._test_redistrict()
+
+        return JsonResponse({'detail' : 'Districts created.', 'districts' : districts}, content_type="application/json", status=200)
     except Exception as e:
     	return JsonResponse({'detail' : 'Failed to start predetermined algorithm', 'error' : str(e)}, content_type="application/json", status=400)
 
@@ -19,6 +24,9 @@ def start(request):
 @api_view(['POST'])
 @csrf_exempt
 def user_start(request):
+    '''
+    Using a predetermined starting point, send back a list of districts that have been redrawn.
+    '''
     try:
     	return JsonResponse({'detail' : 'Districts created.', 'districts' : {}}, content_type="application/json", status=200)
     except Exception as e:
