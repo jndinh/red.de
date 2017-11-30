@@ -12,12 +12,12 @@ def start(request):
     '''
     Using a predetermined starting point, send back a list of districts that have been redrawn.
     '''
-    try:
-        new_districts = districts._test_redistrict()
+    #try:
+    new_districts = districts._test_redistrict()
 
-        return JsonResponse({'detail' : 'Districts created.', 'districts' : new_districts}, content_type="application/json", status=200)
-    except Exception as e:
-    	return JsonResponse({'detail' : 'Failed to start predetermined algorithm', 'error' : str(e)}, content_type="application/json", status=400)
+    return JsonResponse({'detail' : 'Districts created.', 'districts' : new_districts}, content_type="application/json", status=200)
+    #except Exception as e:
+    #	return JsonResponse({'detail' : 'Failed to start predetermined algorithm', 'error' : str(e)}, content_type="application/json", status=400)
 
 
 
