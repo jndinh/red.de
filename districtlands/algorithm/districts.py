@@ -42,12 +42,11 @@ Dorothy Carter - 20171128 - _density method
                             test redistrict methods       
 
 '''
+from . import tracts
+from . import geography_objects
 
 import random
 import json
-
-import tracts
-import geography_objects
 
 # average number of people in an MD congressional district
 MAGIC_POPULATION_NUMBER = 723741
