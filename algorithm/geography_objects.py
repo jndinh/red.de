@@ -1,11 +1,11 @@
 '''
 
-This module defines classes for geographic areas. The classes defined are: tract and district.
+This module defines classes for geographic areas. The classes defined are: tract, district_error, and district.
 
 A tract object represents a census tract. Specifically, it stores its
 * population (int)
 * ID (str)
-* adjacent tracts (list of tracts)
+* adjacent tracts (list of strs)
 
 A district object represents a congressional district. It stores
 * population (int)
@@ -17,9 +17,11 @@ Dorothy Carter - 20171107 - removal of sample scripts
 Dorothy Carter - 20171109 - __eq__() method in tract
                             population updating in district
                             creation of district_error
+Dorothy Carter - 20171127 - added __hash__() method in tract
+Dorothy Carter - 20171128 - fixed some comments
+                            fixed district_error class
 
 '''
-
 
 class tract:
     def __init__(self, pop=0, tract_id=""):
@@ -77,16 +79,23 @@ class tract:
         this prints the tract object nicely.
         '''
         return "Census tract " + self.id + ". Population: " + str(self.population)
-
+    
     def __eq__(self, other):
         '''
         this compares tract ids to determine equality
         '''
-
+        
         if hasattr(other, "id"):
             return self.id == other.id
         else:
             return self.id == other.__str__()
+
+
+    def __hash__(self):
+        '''
+        this hashes the object using its tract id
+        '''
+        return hash(self.id)
 
 
 class district:
@@ -107,7 +116,7 @@ class district:
         '''
         self.tracts.append( tract(tract_pop, tract_id) )
         self.population += tract_pop
-
+        
     def add_tract(self, tract):
         '''
         this adds a previously created tract object to the tracts list
@@ -115,17 +124,17 @@ class district:
         '''
         self.tracts.append(tract)
         self.population += tract.population
-
+        
     def bulk_add_tract(self, many_tracts):
         '''
         this adds a list of tracts to the component tracts
         arguments: many_tracts. A list of tracts. No default
         '''
         self.tracts.extend(many_tracts)
-
+        
         for tract in many_tracts:
             self.population += tract.population
-
+            
     def set_tracts_to(self, new_tracts):
         '''
         this sets the list of component tracts to the list passed in
@@ -137,16 +146,19 @@ class district:
         for tract in new_tracts:
             self.population += tract.population
 
+
     def get_tracts(self):
         '''
         this returns the list of component tracts. not strictly necessary (use self.tracts),
         but provided as a convenience
+        returns: list of strs
         '''
         return self.tracts
 
     def __str__(self):
         '''
         this prints the district object nicely
+        returns: a string representing the district
         '''
         return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " tracts included"
 
@@ -156,7 +168,7 @@ class district_error(Exception):
         '''
         this defines an error originating in these modules,
         to distinguish from runtime, etc
-
         arguments: msg - str - an explanation of the exception
         '''
-        super.__init__(msg)
+        super(Exception, self).__init__()
+        self.message = msg
