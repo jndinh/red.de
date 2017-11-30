@@ -3,8 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 
-from .algorithm import *
-
+import districts
 
 @api_view(['POST', 'GET'])
 @csrf_exempt
@@ -18,7 +17,6 @@ def start(request):
         return JsonResponse({'detail' : 'Districts created.', 'districts' : districts}, content_type="application/json", status=200)
     except Exception as e:
     	return JsonResponse({'detail' : 'Failed to start predetermined algorithm', 'error' : str(e)}, content_type="application/json", status=400)
-
 
 
 
