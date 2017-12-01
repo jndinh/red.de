@@ -174,7 +174,7 @@ def steal_tracts(stealing_district, victim_district):
 
     # this loop keeps trying to steal tracts until the district hits
     # its population target.
-    while stealing_district.population <= MAGIC_POPULATION_NUMBER:
+    while stealing_district.population <= MAGIC_POPULATION_NUMBER and queue:
 
         next = all_tracts[queue.pop()] # dequeue the next tract
 
@@ -326,6 +326,7 @@ def _test_redistrict():
 
     returns: a JSON blorb string
     '''
+    global all_tracts, all_districts, available_tracts
     districts = []
     next = all_tracts["751200"]
     for i in range(8):
