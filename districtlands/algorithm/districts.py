@@ -338,6 +338,11 @@ def _test_redistrict():
     # Debug statement
     # print("{} tracts remain available".format(len(available_tracts)))
 
+    # reset the 'global' variables
+    all_tracts = tracts.get_all_tracts()
+    available_tracts = [k for k in all_tracts.values()]
+    all_districts = {}
+
     return _sanitize_districts(districts)
 
 
