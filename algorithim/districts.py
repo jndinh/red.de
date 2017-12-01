@@ -39,12 +39,12 @@ Dorothy Carter - 20171109 - initial creation
 Dorothy Carter - 20171127 - initial work on expanding method
 Dorothy Carter - 20171127 - initial work on full redistricting
 Dorothy Carter - 20171128 - _density method
-                            test redistrict methods       
+                            test redistrict methods  
+Dorothy Carter - 20171130 - fixing some bugs     
 
 '''
 
 import random
-import json
 
 import tracts
 import geography_objects
@@ -125,9 +125,8 @@ def _create_district(start):
         raise geography_objects.district_error("starting tract is already taken")
     
     # queue up all adjacent tracts to the start
-    queue = set()
-    for t in start.adjacent_to:
-        queue.add(t)
+    queue = list()
+    queue.extend(start.adjacent_to)
     
     # this loop keeps trying to add tracts until the district hits
     # its population target. see ISSUES above for the potential 
@@ -180,7 +179,7 @@ def _sanitize_districts(district_list):
         
         ls.append(dist_dict)
     
-    return json.dumps(ls)
+    return ls
     
 
 def _test_redistrict():
@@ -197,8 +196,7 @@ def _test_redistrict():
         districts.append(new_district)
     
     return _sanitize_districts(districts)
-    
->>>>>>> expanding_rings
+
 
 def generic_redistrict():
     '''
@@ -220,6 +218,11 @@ def specific_redistrict(start):
         print("loop index: {} len available: {}".format(i, len(available_tracts)))
         new_district, next = _create_district(next)
         districts.append(new_district)
+    
+    
+    # reset the 'global' variables
+    all_tracts = tracts.get_all_tracts()
+    available_tracts = [k for k in all_tracts.values()]
    
     print("{} tracts remaining after redistricting".format(len(available_tracts)))
     return districts
