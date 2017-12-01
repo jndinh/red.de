@@ -14,13 +14,14 @@ Dorothy Carter - 20171110 - cast population to int
 import json
 import csv
 import re
+import os
 
 from urllib.request import urlopen
 from urllib.error import HTTPError
-from constants import census_api_key
+from .constants import census_api_key
+from . import geography_objects
 
-import geography_objects
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
 
 def get_all_tracts():
     '''
@@ -45,7 +46,7 @@ def get_all_tracts():
             all_tracts[t[3]] = current_tract
             
         # get the adjacencies
-        with open("./tracts/md_adj_tracts.csv", "r") as tracts_csv:
+        with open(os.path.join(BASE_DIR, "algorithm/tracts_folder/md_adj_tracts.csv"), "r") as tracts_csv:
             reader = csv.DictReader(tracts_csv)
             
             # this gets just the tract ids, not county ids or state codes
