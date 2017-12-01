@@ -16,6 +16,8 @@ def test_create_district():
 	print(newdist)
 
 def main():
-	test_create_district()
+	#test_create_district()
+	ls = districts._test_redistrict()
+	print (ls)
 
 main()
