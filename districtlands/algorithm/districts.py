@@ -140,8 +140,7 @@ def _create_district(start):
             
             # queue all tracts adjacent
             # since queue is a set, no dupes
-            for t in next.adjacent_to:
-                queue.add(t)  
+            queue.extend(next.adjacent_to)
     
     
     # this picks a random adjacent tract
