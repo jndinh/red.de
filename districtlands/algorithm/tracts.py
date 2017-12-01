@@ -21,7 +21,7 @@ from urllib.error import HTTPError
 from .constants import census_api_key
 from . import geography_objects
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_all_tracts():
     '''
@@ -29,8 +29,8 @@ def get_all_tracts():
     returns: a dictionary of all tracts where the keys are the tract ids and
              the values are the tract objects
     '''
-    
-    # this gets the population 18 years & older (P010000) for all census tracts in MD    
+
+    # this gets the population 18 years & older (P010000) for all census tracts in MD
     url = "https://api.census.gov/data/2010/sf1?get=P0100001&for=tract:*&in=state:24&key=" + census_api_key
 
     response = urlopen(url)
@@ -44,11 +44,11 @@ def get_all_tracts():
             current_tract = geography_objects.tract(int(t[0]), t[3])
             #current_tract = _get_adjacent_tracts(current_tract)
             all_tracts[t[3]] = current_tract
-            
+
         # get the adjacencies
         with open(os.path.join(BASE_DIR, "algorithm/tracts_folder/md_adj_tracts.csv"), "r") as tracts_csv:
             reader = csv.DictReader(tracts_csv)
-            
+
             # this gets just the tract ids, not county ids or state codes
             # first two chars are 24 (=MD), then 3 chars for county code. then tract id
             tract_regex = re.compile("^24\d{3}(\d{6})$")

@@ -30,10 +30,12 @@ class tract:
         arguments: pop (=population of tract). Int. Default 0
                    tract_id. Str. Default 0
         sets the adjacent_to attribute to an empty list
+        owning_district is empty string, since no district owns it yet
         '''
         self.population = pop
         self.id = tract_id
         self.adjacent_to = []
+        self.owning_district = ""
 
     def add_adjacency(self, tract):
         '''
@@ -74,17 +76,32 @@ class tract:
         '''
         return self.adjacent_to
 
+    def set_ownership(self, district_id):
+        '''
+        this sets the variable to keep track of what district this tract
+        is part of
+
+        arguments: district_id, and int that is the id the of the district it is part of
+        '''
+        self.owning_district = district_id
+
+    def get_ownership(self):
+        '''
+        returns the id of the district the tract belongs to
+        '''
+        return self.owning_district
+
     def __str__(self):
         '''
         this prints the tract object nicely.
         '''
         return "Census tract " + self.id + ". Population: " + str(self.population)
-    
+
     def __eq__(self, other):
         '''
         this compares tract ids to determine equality
         '''
-        
+
         if hasattr(other, "id"):
             return self.id == other.id
         else:
@@ -99,14 +116,16 @@ class tract:
 
 
 class district:
-    def __init__(self, pop=0):
+    def __init__(self, pop=0, id=0):
         '''
         this initializes a tract object.
         arguments: pop (=population of tract). Int. Default 0
+        id. Int. An arbitrary and unique id for the district. Default 0
         sets the tracts attribute to an empty list
         '''
         self.population = pop
         self.tracts = []
+        self.district_id = id
 
     def add_tract(self, tract_id, tract_pop):
         '''
@@ -116,7 +135,7 @@ class district:
         '''
         self.tracts.append( tract(tract_pop, tract_id) )
         self.population += tract_pop
-        
+
     def add_tract(self, tract):
         '''
         this adds a previously created tract object to the tracts list
@@ -124,28 +143,35 @@ class district:
         '''
         self.tracts.append(tract)
         self.population += tract.population
-        
+        tract.set_ownership(self.district_id)
+
     def bulk_add_tract(self, many_tracts):
         '''
         this adds a list of tracts to the component tracts
         arguments: many_tracts. A list of tracts. No default
         '''
         self.tracts.extend(many_tracts)
-        
+
         for tract in many_tracts:
             self.population += tract.population
-            
+            tract.set_ownership(self.district_id)
+
     def set_tracts_to(self, new_tracts):
         '''
         this sets the list of component tracts to the list passed in
         also updates population
         arguments: new_tracts. A list of tracts. No default
         '''
-        self.tracts = new_tracts
+        # Clean out the old
+        for tract in self.tracts:
+            tract.set_ownership("")
+        self.population = 0
 
+        # In with the new
+        self.tracts = new_tracts
         for tract in new_tracts:
             self.population += tract.population
-
+            tract.set_ownership(self.district_id)
 
     def get_tracts(self):
         '''
@@ -155,12 +181,26 @@ class district:
         '''
         return self.tracts
 
+    def remove_tract(self, tract):
+        '''
+        this removes a tract from the district, by taking it out of the list of tracts
+        in the district object, changing the owner of the tract to nobody, and
+        subtracting the population
+
+        arguments: tract_id, a str of the id of the tract that needs to be removed
+        returns the tract object that got removed
+        '''
+        self.tracts.remove(tract.id)
+        tract.set_ownership("")
+        self.population -= tract.population
+        return tract
+
     def __str__(self):
         '''
         this prints the district object nicely
         returns: a string representing the district
         '''
-        return "District population: " + str(self.population) + ". " + str(len(self.tracts)) + " tracts included"
+        return "District ID: " + str(self.district_id) + ". District population: " + str(self.population) + ". " + str(len(self.tracts)) + " tracts included"
 
 
 class district_error(Exception):
