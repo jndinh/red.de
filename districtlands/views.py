@@ -13,7 +13,7 @@ def start(request):
     Using a predetermined starting point, send back a list of districts that have been redrawn.
     '''
     #try:
-    new_districts = districts._generic_redistrict()
+    new_districts = districts.generic_redistrict()
 
     return JsonResponse({'detail' : 'Districts created.', 'districts' : new_districts}, content_type="application/json", status=200)
     #except Exception as e:
