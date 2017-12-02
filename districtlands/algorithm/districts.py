@@ -309,7 +309,7 @@ def generic_redistrict():
     this redistricts Maryland using a default start tract
     returns: a list of 8 district objects
     '''
-    start = all_tracts["751200"]
+    start = "751200"
     return specific_redistrict(start)
 
 
