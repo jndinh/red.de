@@ -19,7 +19,6 @@ from districtlands import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^example/', include('example.urls')),
     url(r'^start/$', views.start, name='Predetermined start'),
     url(r'^userstart/$', views.user_start, name='User determined start'),
 ]
