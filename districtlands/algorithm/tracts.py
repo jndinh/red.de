@@ -18,7 +18,7 @@ import os
 
 from urllib.request import urlopen
 from urllib.error import HTTPError
-from .constants import census_api_key
+from constants import census_api_key
 from . import geography_objects
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,10 +40,11 @@ def get_all_tracts():
         all_tracts = {}
         data = json.load(response)
         for t in data[1:]: # the first object is titles of variables
-            # population is [0], tract_id is [3]
-            current_tract = geography_objects.tract(int(t[0]), t[3])
+            # population is [0], county id is [2] tract_id is [3]
+            geoid = "{}{}{}".format(t[1], t[2], t[3])
+            current_tract = geography_objects.tract(int(t[0]), geoid)
             #current_tract = _get_adjacent_tracts(current_tract)
-            all_tracts[t[3]] = current_tract
+            all_tracts[geoid] = current_tract
 
         # get the adjacencies
         with open(os.path.join(BASE_DIR, "algorithm/tracts_folder/md_adj_tracts.csv"), "r") as tracts_csv:
@@ -51,7 +52,7 @@ def get_all_tracts():
 
             # this gets just the tract ids, not county ids or state codes
             # first two chars are 24 (=MD), then 3 chars for county code. then tract id
-            tract_regex = re.compile("^24\d{3}(\d{6})$")
+            tract_regex = re.compile("^(24\d{3}\d{6})$")
             for row in reader:
                 row_match = tract_regex.match(row['SOURCE_TRACTID'])
                 all_tracts[row_match.group(1)].add_adjacency(tract_regex.match(row['NEIGHBOR_TRACTID']).group(1))
