@@ -18,7 +18,7 @@ import os
 
 from urllib.request import urlopen
 from urllib.error import HTTPError
-from constants import census_api_key
+from .constants import census_api_key
 from . import geography_objects
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
