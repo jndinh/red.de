@@ -5,7 +5,7 @@ for the algorithm code
 
 '''
 
-import districts
+from . import districts
 
 # Test create district function, using the 1st item in the available tracts
 # as the arbitrary starting point
