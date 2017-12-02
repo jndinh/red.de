@@ -79,36 +79,6 @@ def _take_tract(tractid):
         return False
 
 
-def _density(this_tract):
-    '''
-    this measures how many of the tract's adjacent tracts are
-    available to take. this is computationally expensive, but
-    does it matter?
-
-    argument: this_tract - a tract object
-    returns: a float representing the proportion of available
-             tracts to total adjacent tracts
-    '''
-    #total_adjacent = 0
-    available_adjacent = 0
-
-    # adjacent tracts...
-    friends = this_tract.adjacent_to
-
-    # ... and tracts adjacent to those
-    # avoid duplicates using a set and an if statement
-    friends_of_friends = {ff for tract in friends for ff in all_tracts[tract].adjacent_to if ff not in friends}
-
-    total_adjacent = len(this_tract.adjacent_to) + len(friends_of_friends)
-
-    # find those adjacent
-    first_ring_available = [t for t in this_tract.adjacent_to if t in available_tracts]
-    second_ring_available = [t for t in friends_of_friends if t in available_tracts]
-    available_adjacent = len(first_ring_available) + len(second_ring_available)
-
-    return available_adjacent / (total_adjacent * 1.0)
-
-
 def get_adjacent_district_ids(reference_district):
     '''
     returns a list of district ids that this district is currently adjacent to
@@ -283,19 +253,6 @@ def _create_district(start, district_id):
     # this picks a random adjacent tract
     # see issues above for running out of tracts issue
     next_id = None
-
-    # keep best
-    # max_tract = None
-    # max_density = 0.0
-
-    # # .875 adjacent is _goodenough_
-    # while queue and max_density < .875:
-    #     next = all_tracts[queue.pop()]
-    #     next_density = _density(next)
-    #     if next in available_tracts and next_density > max_density:
-    #         max_density = next_density
-    #         max_tract = next
-
     next_id = random.choice(available_tracts)
 
     return (created_district, all_tracts[next_id])
@@ -318,14 +275,14 @@ def _sanitize_districts(district_list):
 
     return ls
 
-
+'''
 def _test_redistrict():
-    '''
+    ''''''
     only for test purposes. partially re-districts
     Maryland into two normal districts ~700_000 in population
 
     returns: a JSON blorb string
-    '''
+    ''''''
     global all_tracts, all_districts, available_tracts
     districts = []
     next = all_tracts["751200"]
@@ -345,7 +302,7 @@ def _test_redistrict():
     all_districts = {}
 
     return _sanitize_districts(districts)
-
+'''
 
 def generic_redistrict():
     '''
@@ -359,13 +316,16 @@ def generic_redistrict():
 def specific_redistrict(start):
     '''
     this redistricts Maryland using a given start tract
-    arguments: start - a tract object that districting will start from
+    arguments: start - a tract id representing the tract that districting will start from
     returns: a list of district objects (8 district objects)
     '''
+    global all_tracts, all_districts, available_tracts
+    start = all_tracts[start]
+    
     districts = []
     next = start
     for i in range(8):
-        print("loop index: {} len available: {}".format(i, len(available_tracts)))
+        #print("loop index: {} len available: {}".format(i, len(available_tracts)))
         new_district, next = _create_district(next, i)
         districts.append(new_district)
         all_districts[i] = new_district
@@ -375,5 +335,5 @@ def specific_redistrict(start):
     available_tracts = [k for k in all_tracts.values()]
     all_districts = {}
 
-    print("{} tracts remaining after redistricting".format(len(available_tracts)))
-    return districts
+    #print("{} tracts remaining after redistricting".format(len(available_tracts)))
+    return _sanitize_districts(districts)
