@@ -41,7 +41,8 @@ Dorothy Carter - 20171127 - initial work on full redistricting
 Dorothy Carter - 20171128 - _density method
                             test redistrict methods
 Dorothy Carter - 20171130 - fixing some bugs
-Steaphen Lin - 20171201 - added stealing methods
+Stephen Lin - 20171201 - added stealing methods
+Stephen Lin - 20171204 - added stealing based on potential
 
 '''
 from . import tracts
@@ -198,6 +199,26 @@ def revalidate_district(district):
             queue.extend(next.adjacent_to)
 
 
+def update_potentials():
+    '''
+    This updates the "potential" variable for all the districts made thus far
+    Potential is number of adjacent tracts available to take
+    '''
+    for id, district in all_districts.items():
+        district.potential = 0 # reset
+        tract_set = set() # set, no dupes
+
+        # Grab all adjacent tracts of the districts
+        for tractid in district.tracts:
+            for tract in all_tracts[tractid].adjacent_to:
+                tract_set.add(tract)
+
+        # Sum up number of free tracts to get the potential
+        for tractid in tract_set:
+            if all_tracts[tractid].owning_district == "":
+                district.potential = district.potential + 1
+
+
 def _create_district(start, district_id):
     '''
     this creates one congressional district given a starting tract
@@ -235,9 +256,16 @@ def _create_district(start, district_id):
         if not queue:
             # Find out who I can steal from
             adjacent_districts = get_adjacent_district_ids(created_district)
-            # Debug statement
-            # print(adjacent_districts)
-            steal_tracts(created_district, all_districts[adjacent_districts[0]])
+
+            # Target the adjacent district with most potential
+            to_steal_from = adjacent_districts[0]
+            update_potentials()
+            for district in adjacent_districts:
+                if all_districts[district].potential >= all_districts[to_steal_from].potential:
+                    to_steal_from = district
+
+            # Steal!
+            steal_tracts(created_district, all_districts[to_steal_from])
             break
 
         next = all_tracts[queue.pop()] # dequeue the next tract
@@ -321,7 +349,7 @@ def specific_redistrict(start):
     '''
     global all_tracts, all_districts, available_tracts
     start = all_tracts[start]
-    
+
     districts = []
     next = start
     for i in range(8):
