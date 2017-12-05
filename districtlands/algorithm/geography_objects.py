@@ -122,10 +122,14 @@ class district:
         arguments: pop (=population of tract). Int. Default 0
         id. Int. An arbitrary and unique id for the district. Default 0
         sets the tracts attribute to an empty list
+        potential. Int. Number of adjacent tracts to any tract of the district that
+        has no owner and thus is free to be taken, the number that
+        can be "potentially taken". Will be updated by an outside function
         '''
         self.population = pop
         self.tracts = []
         self.district_id = id
+        self.potential = 0
 
     def add_tract(self, tract_id, tract_pop):
         '''
