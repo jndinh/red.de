@@ -24,4 +24,4 @@ def test_test_redistrict():
 
 
 if __name__ == "__main__":
-    test_test_redistrict()
+    districts.generic_redistrict()

@@ -43,6 +43,8 @@ Dorothy Carter - 20171128 - _density method
 Dorothy Carter - 20171130 - fixing some bugs
 Stephen Lin - 20171201 - added stealing methods
 Stephen Lin - 20171204 - added stealing based on potential
+Stephen Lin - 20171204 - added final sweep evening and cleanup of tracts
+                         corrected magic population number
 
 '''
 from . import tracts
@@ -51,7 +53,8 @@ from . import geography_objects
 import random
 
 # average number of people in an MD congressional district
-MAGIC_POPULATION_NUMBER = 723741
+MAGIC_POPULATION_NUMBER = 552573
+MAGIC_POPULATION_NUMBER_95PERCENT = 524944
 
 # every census tract in md
 # Dictionary of all tracts. Key: tract ID, Value: tract object
@@ -144,8 +147,8 @@ def steal_tracts(stealing_district, victim_district):
         queue.extend(tract.adjacent_to)
 
     # this loop keeps trying to steal tracts until the district hits
-    # its population target.
-    while stealing_district.population <= MAGIC_POPULATION_NUMBER and queue:
+    # its population target, or has nothing left to steal
+    while stealing_district.population < MAGIC_POPULATION_NUMBER and queue:
 
         next = all_tracts[queue.pop()] # dequeue the next tract
 
@@ -184,19 +187,65 @@ def revalidate_district(district):
     # this loop keeps trying to add tracts until the district hits
     # its population target. Or if no more things to add
     # TODO: currently if run out of things to add, just throw hands up and give up
-    while district.population <= MAGIC_POPULATION_NUMBER and queue:
+    while district.population < MAGIC_POPULATION_NUMBER and queue:
 
         # TODO: Check if trapped again? But could end up in vicious recursion cycle...
 
         next = all_tracts[queue.pop()] # dequeue the next tract
 
         if _take_tract(next.id):
-            # Debug Statement:
-            # print(next.id + " stealing success!")
             district.add_tract(next)
 
             # queue all tracts adjacent
             queue.extend(next.adjacent_to)
+
+
+def revalidate_overload(district):
+    '''
+    this function takes the district, and grabs any free tracts
+    adjacent to it until it cant grab anymore
+
+    should be used only as a final passthrough, think of it as
+    cleaning up leftover crumbs
+    '''
+    queue = list()
+    # Just add everything every tract in the district is adjacent to
+    # It's not computationally efficient, but currently don't have a method
+    # to pick and choose the outer edge tracts only
+    for tract in district.tracts:
+        queue.extend(tract.adjacent_to)
+
+    # this loop keeps trying to add tracts until there's no more things to add
+    while queue:
+        next = all_tracts[queue.pop()] # dequeue the next tract
+
+        if _take_tract(next.id) and next.owning_district == "":
+            district.add_tract(next)
+
+            # queue all tracts adjacent
+            queue.extend(next.adjacent_to)
+
+
+def revalidate_small_districts():
+    '''
+    this function goes through all the districts made and
+    if the population is too small (<95% of the average) then it will
+    steal from the neighbor with the biggest potential
+    '''
+    for id, district in all_districts.items():
+        update_potentials()
+        if district.population < MAGIC_POPULATION_NUMBER_95PERCENT:
+            # Find out who I can steal from
+            adjacent_districts = get_adjacent_district_ids(district)
+
+            # Target the adjacent district with most potential
+            to_steal_from = adjacent_districts[0]
+            for d_id in adjacent_districts:
+                if all_districts[d_id].potential >= all_districts[to_steal_from].potential:
+                    to_steal_from = d_id
+
+            # Steal!
+            steal_tracts(district, all_districts[to_steal_from])
 
 
 def update_potentials():
@@ -248,10 +297,7 @@ def _create_district(start, district_id):
     # this loop keeps trying to add tracts until the district hits
     # its population target. see ISSUES above for the potential
     # infinite loop issue
-    # TODO: add and (queue and available_tracts)? not exactly that some similar idea?
-    while created_district.population <= MAGIC_POPULATION_NUMBER:
-        #print("in queue: {} ; next score: {}".format(len(queue)+1, _density(next)))
-
+    while created_district.population < MAGIC_POPULATION_NUMBER:
         # Check if trapped
         if not queue:
             # Find out who I can steal from
@@ -303,34 +349,6 @@ def _sanitize_districts(district_list):
 
     return ls
 
-'''
-def _test_redistrict():
-    ''''''
-    only for test purposes. partially re-districts
-    Maryland into two normal districts ~700_000 in population
-
-    returns: a JSON blorb string
-    ''''''
-    global all_tracts, all_districts, available_tracts
-    districts = []
-    next = all_tracts["751200"]
-    for i in range(8):
-        new_district, next = _create_district(next, i)
-        districts.append(new_district)
-        all_districts[i] = new_district
-        # Debug statement
-        # print(new_district)
-
-    # Debug statement
-    # print("{} tracts remain available".format(len(available_tracts)))
-
-    # reset the 'global' variables
-    all_tracts = tracts.get_all_tracts()
-    available_tracts = [k for k in all_tracts.values()]
-    all_districts = {}
-
-    return _sanitize_districts(districts)
-'''
 
 def generic_redistrict():
     '''
@@ -349,19 +367,34 @@ def specific_redistrict(start):
     '''
     global all_tracts, all_districts, available_tracts
     start = all_tracts[start]
-
     districts = []
     next = start
+
+    # Inital setup of districts
     for i in range(8):
-        #print("loop index: {} len available: {}".format(i, len(available_tracts)))
         new_district, next = _create_district(next, i)
         districts.append(new_district)
         all_districts[i] = new_district
+
+    # There will be leftover tracts
+    # So slowly steal from each other to even things out
+    for x in range(0, 15):
+        revalidate_small_districts()
+
+    # There may be a few leftover tracts at this point
+    # Let whichever district who is able to to just pick them up
+    # Their population will be "overloaded", but only by a negligible amount
+    update_potentials()
+    for id, district in all_districts.items():
+        if district.potential > 0:
+            revalidate_overload(district)
+
+    # Debug statement:
+    # print("{} tracts remaining after redistricting".format(len(available_tracts)))
 
     # reset the 'global' variables
     all_tracts = tracts.get_all_tracts()
     available_tracts = [k for k in all_tracts.values()]
     all_districts = {}
 
-    #print("{} tracts remaining after redistricting".format(len(available_tracts)))
     return _sanitize_districts(districts)
